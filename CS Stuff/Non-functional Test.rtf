@@ -1,0 +1,235 @@
+{\rtf1\mac\ansicpg10000\cocoartf100
+{\fonttbl\f0\froman\fcharset77 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9000\viewh9000\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+
+\f0\fs24 \cf0 (* Ellis *)\
+local\
+	open IntSet\
+	val N = 10000\
+	val n = N div 2\
+	val bigList = List.tabulate(N, fn x => x)\
+	val smallList = List.tabulate(n, fn x => x)\
+	val s = emptySet N\
+	val s1 = emptySet N\
+in	\
+fun test02 () = (addList(s,bigList); \
+		addList(s1,smallList); (* s1 is first half of s *)\
+		subset(s1,s) andalso (reduce(s,s1); restrict (s,s1); isEmpty s))\
+		(* removes first half from s, checks that intersection is empty *)\
+end\
+(* Keller *)\
+local\
+    val size = 1000\
+    val half = size div 2\
+    val l = List.tabulate(size,fn x => x)\
+    val l' = List.take(l,half)\
+    val s = emptySet size\
+    val s' = emptySet half\
+    val s'' = emptySet half\
+in\
+    fun testnf () =\
+              (   addList(s,l);\
+                  addList(s',l');\
+                  addList(s'',l);\
+                  reduce(s'',s');\
+                  extend(s',s'');\
+                  equal(s,s')\
+              )\
+end\
+(*Kraft*)\
+local \
+    open IntSet\
+    val N = 10000\
+    val bigList = List.tabulate (N, fn _ => randInt(0,NONE))\
+     val s = emptySet N\
+     val s1 = emptySet N\
+     val s2 = emptySet N\
+  in\
+  fun tester2 ()\
+     (addList(s, bigList);\
+      extend(s1,s);\
+      extend(s2,s1);\
+      extend(s1,s1);  (*nothing happening*)\
+      reduce(s,s1);   (*s gone*)\
+      (equal(s1,s2)) andalso (List.length(toList(s1))= N) andalso ((size(s1)) = N) andalso (isEmpty s))\
+ end\
+(* ME *)\
+local\
+    open IntSet\
+    val y = 1000\
+    val l = List.tabulate(y,fn x => x)\
+    val l' = List.tabulate (y, fn x => x+400)\
+    val s = emptySet y\
+    val s' = emptySet y\
+    val p = emptySet y\
+    val p' = emptySet y\
+in\
+   fun testvmnf() = \
+(addList(s,l);addList(s',l');addList(p,l);addList(p',l');reduce(p,s');restrict(p',s);extend(p',p);extend(p,p');equal(p',p))\
+end\
+(* ALEX *)\
+local\
+   open IntSet\
+   val i = 100\
+   fun fill_list(s, 0) = s\
+   |   fill_list(s, n) = (insert(randInt(1,NONE),s);fill_list(s,n-1)); \
+   val A = fill_list(emptySet i, i)\
+   val B = fill_list(emptySet i, i)\
+   val A' = dup(A);\
+in\
+fun AisSubA'() = (reduce(A,B);subset(A,A') andalso (isEmpty(B) orelse size(A) < size(A')));\
+end\
+(* O'MEARA *)\
+\
+\
+local\
+    open IntSet\
+    val minN = 1000\
+    val maxN = 4*1000\
+    val list1 = List.tabulate(minN, fn _ => randInt(0, NONE))\
+    val list2 = List.tabulate(minN, fn _ => randInt(0, NONE))\
+    val list3 = List.tabulate(minN, fn _ => randInt(0, NONE))\
+    val A = emptySet maxN\
+    val B = emptySet maxN\
+    val C = emptySet maxN\
+    val S1 = emptySet maxN (* used for result *)\
+    val S2 = emptySet maxN (* used for temp storage for A*)\
+    val S3 = emptySet maxN\
+    val S4 = emptySet maxN\
+    val S5 = emptySet maxN\
+    val B2 = emptySet maxN (* temp value for B *)\
+in\
+    fun distTest()= (addList(A,list1);\
+                 addList(B,list2);\
+                 addList(C,list3);\
+                 copy (S1, A);\
+                 copy (S2, A);\
+                 copy (S3, A);\
+                 copy (S4, A);\
+                 copy (S5, A);\
+                 copy (B2, B);\
+                 extend(S1, B);\
+                 extend(S2, C);\
+                 restrict(S1, S2);\
+                 restrict(B, C);\
+                 extend(A, B);\
+                 restrict(S3, B2);\
+                 restrict(S4, C);\
+                 extend(S3, S4);\
+                 extend(B2, C);\
+                 restrict(S5, B2);\
+                 equal(S1, A) andalso equal(S3, S5))\
+end\
+(* PRINE *)\
+\
+local\
+	open IntSet\
+	val s = 6000\
+	val half = s div 2\
+	val la = List.tabulate (s, fn a => a)\
+	val lb = List.tabulate (s, fn a => a+half)\
+	val a = emptySet s\
+	val b = emptySet s\
+	val c = emptySet s\
+	val d = emptySet s\
+	val e = emptySet s\
+\
+in\
+fun mynftest () = (\
+	addList(a,la);\
+	addList(b,lb);\
+	copy(a,c); 	(* copy a to c,d,e *)\
+	copy(a,d);\
+	copy(a,e);\
+	reduce(a,b);	(* a = a \\ b *)\
+	restrict(c,b); 	(* c = a ^ b *)\
+	extend(d,c);	(* d = a v (a^b) *)\
+	study(d);\
+	restrict(a,c);  (* a = (a\\b) ^ (a^b) *)\
+	(isEmpty(a)) andalso (equal(e,d))\
+	)\
+end\
+(* Thib *)\
+local\
+   open StrSet\
+   val n = 2000\
+   val t = n*2\
+   val l = 30\
+   val listOne = List.tabulate(n, fn _ => randWord l)\
+   val listTwo = List.tabulate(n, fn _ => randWord l)\
+   val S1 = emptySet t\
+   val S2 = emptySet t\
+   val S3 = emptySet t\
+  \
+  in\
+   fun test08 () = (addList(S1,listOne); addList(S2,listTwo); copy(S1,S3);\
+  reduce(S1,S2); addList(S2,toList(S1));study(S3); extend(S3,S2);\
+  equal(S2,S3) )\
+  end\
+(* Weiss *)\
+\
+local\
+    val TestSize = 10\
+    val L = List.tabulate(TestSize, fn x => x)\
+    val X = emptySet(TestSize)\
+    val Q = addList(X,L) (*side-effect*)\
+    fun test02H(0,_) = true\
+    |   test02H(n,S) = if(size(S) <> n) then false\
+	else remove(n-1,S); test02H((n-1), S) )\
+in\
+    fun test02() = (test02H ((TestSize),X))\
+end\
+(* WU *)\
+  local\
+   open IntSet\
+   val NUM = 1000\
+   val l1 = List.tabulate( NUM, fn _ => randInt(0, NONE) )\
+   val l2 = List.tabulate( NUM, fn _ => randInt(0, NONE) )\
+   \
+   val l =  List.tabulate( NUM, fn  n => n)\
+   val total1 = addList(emptySet (SOME NUM), l) (* the set has all the\
+   elements from 0 to 999*)\
+   val total2 = addList(emptySet (SOME NUM), l) (* the set has all the\
+   elements from 0 to 999*)\
+   val total3 = addList(emptySet (SOME NUM), l) (* the set has all the\
+   elements from 0 to 999*)\
+   \
+   val P =addList(emptySet (SOME NUM), l1)\
+   val Q = addList(emptySet (SOME NUM), l2)\
+   val P' = addList(emptySet (SOME NUM), l1) (* P' is the same as P)\
+   \
+   in\
+   fun NFTest() = (\
+     restrict(P,Q);\
+     reduce(total1,P);\
+     reduce(total2,P');\
+     reduce(total3,Q);\
+     extend(total2,total3);\
+     equal(total1,total2)\
+     )\
+   \
+   end\
+(* Z *)\
+\
+local\
+    open IntSet\
+    val N = 10000\
+    val l = List.tabulate(N, fn _ => randInt(0,NONE))\
+    val l1 = List.tabulate(N, fn _ => randInt(0,NONE))\
+    val s = emptySet N\
+    val s1 = emptySet N\
+    val s' = emptySet N\
+    val s1' = emptySet N\
+in\
+fun testzt () = (addList(s,l);\
+     addList(s',l);\
+     addList(s1,l1);\
+     addList(s1',l1);\
+     extend(s1,s);\
+     restrict(s1',s);\
+     restrict(s,s1);\
+     extend(s',s1');\
+     equal(s,s'))\
+end}

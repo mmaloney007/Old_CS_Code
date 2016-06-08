@@ -1,0 +1,98 @@
+fun gcd (x, 0) = x
+| gcd (x,y) = gcd (y, x mod y);
+fun sum [] = 0
+ | sum (x::t) = x + sum t;
+local
+   fun collatzh(1,y) = y
+   | collatzh(x,y) =                 
+   if ((x mod 2) = 0) then collatzh(x div 2,y+1)
+   else collatzh ((3*x)+1,y+1)
+in
+   fun collatz 0 = 0
+   | collatz x = collatzh(x,0)
+end;
+local 
+   fun sumh [] x = x
+   | sumh (y::t) x = sumh t (y+x)
+in 
+   fun sum [] = 0
+   | sum (y::t) = sumh t y
+end;
+local
+   fun natListh 0 (x::t) = (x::t)
+   | natListh y (x::t) = natListh (y-1) (y::(x::t))
+in     
+   fun natList 0 = []
+   | natList n = natListh (n-1) [n]
+end;
+local
+  fun revh (x::nil) l = (x::l)
+  | revh (x::y) l = revh y (x::l)
+in
+  fun rev [] = []
+  | rev (x::nil) = (x::nil)
+  | rev (x::y) = revh y [x]
+end;
+fun hanoi (n,l,c,r) =
+   if (n=0) then print("")
+   else ((hanoi((n-1),l,r,c);print(" Move "^l^" to "^r^",");(hanoi((n-1),c,l,r))));
+local
+   exception Impossible
+in 
+   fun last [] = raise Impossible
+   | last (x::nil) = x
+   | last (x::y) = last y 
+end;
+fun emptySet() = [];
+fun insert n [] = [n]
+ | insert n (x::t) = (n::(x::t));
+local
+   fun unoinh [] (x::t) l = unoinh [] t (l@[x])
+   | unoinh (y::p) (x::t) l = 
+     if (y<x) then unoinh p (x::t) (l@[y])
+     else if (y=x) then unoinh p t (l@[y])
+     else unoinh (y::p) t (l@[x])
+    | unoinh (y::p) [] l = unoinh p [] (l@[y])
+    | unoinh [] [] l = l
+in
+   fun unoin g h = unoinh g h []
+end;
+local
+   exception Impossible
+in
+   fun epsilon [] = raise Impossible
+   | epsilon (x::t) = x
+end;
+fun member x [] = false
+ | member x (y::t) =
+   if (x=y) then true
+  else member x t;
+local
+   fun intersecth [] (x::t) l = l
+   | intersecth (y::p) (x::t) l = 
+     if (y=x) then intersecth p t (l@[y])
+     else (intersecth p (x::t) l); intersecth (x::t) (y::p) l)
+   | intersecth (y::p) [] l = l
+   | intersecth [] [] l = l
+in
+   fun intersect g h = intersecth g h []
+end;
+local 
+  exception Impossible;
+  fun removeh x [] l = rev(l)
+  | removeh x (y::t) l = if (x=y) then removeh x t l else removeh x t (y::l) 
+in
+  fun remove x [] = raise Impossible
+  | remove x t = removeh x t []
+end;
+local
+   fun diffh [] (x::t) l = diffh [] t l
+   | diffh (y::p) (x::t) l =
+     if (y<x) then diffh p (x::t) (l)
+     else if (y=x) then diffh p t (l)
+     else diffh (y::p) t (l@[x])
+    | diffh (y::p) [] l = diffh p [] l
+    | diffh [] [] l = l
+in 
+   fun diff g h = diffh g h []
+end;

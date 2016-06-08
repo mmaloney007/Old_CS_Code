@@ -1,0 +1,179 @@
+{\rtf1\mac\ansicpg10000\cocoartf100
+{\fonttbl\f0\froman\fcharset77 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9000\viewh9000\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+
+\f0\fs24 \cf0 (*Ellis*)\
+local\
+	open IntSet\
+	val N = 10000\
+	val n = N div 2\
+	val bigList = List.tabulate(N, fn x => x)\
+	val smallList = List.tabulate(n, fn x => x)\
+	val s = emptySet NONE\
+	val s1 = emptySet NONE\
+	val s2 = emptySet NONE\
+	val s3 = emptySet NONE\
+in	\
+fun test02 () = \
+	let 	val s = addList(s,bigList)\
+	    	val s1 = addList(s1,smallList) (* s1 is first half of s *);\
+		val s2 = diff(s,s1)\
+		val s3 = intersect(s1,s2)\
+	in subset(s1,s) andalso isEmpty s3\
+		(* removes first half from s, checks that intersection is empty *)\
+	end\
+end\
+(* Kelller *)\
+local\
+    val size = 1000\
+    val half = size div 2\
+    val l = List.tabulate(size,fn x => x)\
+    val s = addList((emptySet NONE),l)\
+    val s' = addList((emptySet NONE),List.take(l,half))\
+in\
+    fun testf () = equal(union((intersect(s,s')),(diff(s,s'))),s)\
+end\
+(* Kraft *)\
+  local\
+     open IntSet\
+     val N = 10000   \
+     val bigList = List.tabulate(N, fn _ => randInt(0,NONE))\
+     val s = emptySet(SOME N)\
+     val s1 = emptySet(SOME N)\
+     val s2 = emptySet(SOME N)\
+  in\
+  fun tester1 () =\
+     let val s = addList(s, bigList)\
+         val s1 = union(s1,s)\
+         val s2 = union(s1,s1)  (*hope s2=s1*)\
+         val s3 = toList s1     (*hope s3=bigList*)\
+         val s = diff(s,s1)\
+   in (equal(s1,s2)) andalso (List.length(s3) = N) andalso ((size(s1)) = N) andalso (isEmpty s)\
+    end\
+ end\
+(* ME *)\
+local\
+    open IntSet\
+    val y = 1000\
+    val y' = 1000\
+    val l = List.tabulate(y,fn x => x)\
+    val l' = List.tabulate (y', fn x => x+400)\
+    val s = addList(emptySet NONE,l)\
+    val s' = addList(emptySet NONE, l')\
+in\
+    fun testvmf() = equal(union(union(diff(s',s),diff(s,s')),intersect(s',s)),union(s',s))andalso size(diff(s',s)) < size(intersect(s',s)) andalso not(equal(diff(s',s),diff(s,s')))\
+end\
+(* ALEX *)\
+local\
+   open IntSet\
+   val i = 100\
+   fun fill_list(s, 0) = s\
+   |   fill_list(s, n) = fill_list(insert(randInt(1,NONE), s), n-1) \
+   \
+   val A = fill_list(emptySet (SOME i), i)\
+   val B = fill_list(emptySet (SOME i), i)\
+in\
+fun AuBnA() = equal(A, union(A,intersect(A,B))) andalso size(B) >= \
+size(intersect(A,B));\
+end\
+(* O'MEARA *)\
+\
+\
+local\
+    open IntSet\
+    val minN = 1000\
+    val list1 = List.tabulate(minN, fn _ => randInt(0, NONE))\
+    val list2 = List.tabulate(minN, fn _ => randInt(0, NONE))\
+    val list3 = List.tabulate(minN, fn _ => randInt(0, NONE))\
+    val A = addList(emptySet (SOME minN), list1)\
+    val B = addList(emptySet (SOME minN), list2)\
+    val C = addList(emptySet (SOME minN), list3)\
+in\
+    fun distTest () = equal ((intersect((union(A,B)),(union(A,C)))),\
+                        (union(A, intersect(B, C)))) andalso\
+                      equal ((union((intersect(A,B)), (intersect(A,C)))),\
+                        (intersect(A, union(B,C))))\
+end\
+(* PRINE *)\
+\
+local\
+	open IntSet\
+	val s = 6000\
+	val half = s div 2\
+	val a = addList (( emptySet NONE), (List.tabulate (s, fn a => a))\
+)\
+	val b = addList (( emptySet NONE), (List.tabulate (s, fn a =>\
+a+half)) )\
+	val c = intersect(a,b)\
+\
+in\
+fun myftest () = (isEmpty(intersect(c, study(diff(a,b))))) andalso\
+(equal(a,union(a,c)))\
+end\
+(* Thib *)\
+\
+local\
+\
+     open IntSet\
+     val n= 7000\
+     val listOne = List.tabulate(n, fn _ => randInt(0,NONE))\
+     val listTwo = List.tabulate(n, fn _ => randInt(0,NONE))\
+     val S = emptySet NONE\
+     val F = emptySet NONE\
+     val F = addList(F,42listOne)\
+     val S = addList(S,42listTwo) (* they are not disjoint *)\
+     val F = insert(41,F);\
+     val S = remove(41,S); (* they are not equal *)\
+  \
+  \
+    in\
+    fun test08 () = let val v = union(S,F)\
+     val v= diff(v,(study(F)))\
+     val v= remove((Option.valOf(epsilon(v))),v)\
+      in\
+     subset(v, S) andalso not(equal(v,S))\
+    end\
+    end\
+(* Weiss *)\
+local\
+    val TestSize = 10\
+    val L = List.tabulate(TestSize, fn x => x)\
+    val X = addList( (emptySet NONE ),L)\
+    fun test06H 0 _ = true\
+    |   test06H n S = if(size(S) <> n) then false\
+	else test06H (n-1) (remove((n-1), S))\
+in\
+    fun test06() = test06H (TestSize) X\
+end\
+(* WU *)\
+\
+   local\
+   open IntSet\
+   val NUM = 1000\
+   val l1 = List.tabulate( NUM, fn _ => randInt(0, NONE) )\
+   val l2 = List.tabulate( NUM, fn _ => randInt(0, NONE) )\
+   \
+   val l =  List.tabulate( NUM, fn  n => n)\
+   val total = addList(emptySet (SOME NUM), l) (* the set has all the\
+   elements from 0 to 999*)\
+   val P = addList(emptySet (SOME NUM), l1)\
+   val Q = addList(emptySet (SOME NUM), l2)\
+   fun complement s = diff(total,s)\
+   \
+   in\
+   fun FTest () =\
+   equal((complement(intersect(P,Q))),(union(complement(P),complement(Q))\
+   )) end\
+(* Z *)\
+\
+local\
+    open IntSet\
+    val N = 100\
+    val l = List.tabulate( N, fn _ => randInt(0, NONE) )\
+    val l1 = List.tabulate( N, fn _ => randInt(0, NONE) )\
+    val s = addList(emptySet (SOME N), l)\
+    val s1 = addList(emptySet (SOME N), l1)\
+fun testzt () = equal(( intersect(s,(union(s,s1)))),(union(s,(intersect(s,s1)))))\
+end}

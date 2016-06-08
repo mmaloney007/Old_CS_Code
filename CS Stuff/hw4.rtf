@@ -1,0 +1,139 @@
+{\rtf1\mac\ansicpg10000\cocoartf100
+{\fonttbl\f0\froman\fcharset77 TimesNewRomanPS-BoldMT;\f1\froman\fcharset77 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue255;\red157\green17\blue179;}
+\margl1440\margr1440\vieww9000\viewh9000\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+
+\f0\b\fs20 \cf0 Sample code for homework 4
+\f1\b0 \
+\
+NOTE:\
+\'ca\
+\'ca\'ca\'ca The following are just 
+\f0\b \cf2 sample
+\f1\b0 \cf0  codes. You can use it directly, but no guarantees. You can implement everything in your own way.\
+\'ca\'ca\
+#include <stdio.h>\
+#include <stdlib.h>\
+#include <unistd.h>\
+#include <sys/wait.h>\
+#include "pipeline.h"\
+#include <string.h>\
+\'ca\
+
+\f0\b PIPE LINE 
+\f1\b0 \
+int main ( int argc, char * argv[] )\
+\{\
+\'ca\'ca\'ca\'ca\'ca int pc[ 2 ]; /* pipe channels */\
+\'ca\'ca\'ca\'ca\'ca int child, child1, child2, status;\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca .......\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca parse( command, command1, command2, comargv1, comargv2 );\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca pipe( pc ); /* Create a pipeline */\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca if ( ( child1 = fork() ) != 0 )\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca /* parent shell executes here */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \{\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca if ( ( child2 = fork() ) != 0 )\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca /* still the parent */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \{\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( pc[ 0 ] );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( pc[ 1 ] );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca while( ( child = wait( &status ) ) != child1 \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca && ( child != child2 ))\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca ;\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca while( ( child = wait( &status ) ) != child1 \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca && ( child != child2 ))\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca ;\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \}/* end of second if\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca * repalceing read pipe for stdin in child2 \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca * child2 is recieving the input from child1.\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca * it is the one after the '|' */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca else \{ /* child 2 */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca dup2( pc[ 0 ], 0 );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( pc[ 1 ] ) ;\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( pc[ 0 ] ) ;\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca err = execvp( command2, comargv2 );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca /* error checking.\'ca if 'command' is not a valid command. */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca if ( err == -1 ) \{\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca fprintf( stderr, "bad command or file name\\n");\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca exit(0);\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \}\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca\}/*end of else */\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \}/* end of first if \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca * replacing write pipe for stdout in child1 \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca * child1 is the one generating the output for child2\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca * it is the one before the '|' */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca else \{ /* child 1 */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca dup2( pc[ 1 ], 1 );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( pc[ 0 ] );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( pc[ 1 ] );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca err = execvp( command1, comargv1 );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca ........\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \'ca\}/*end of else */\
+\'ca\
+\}/* end of main*/\
+\'ca\
+\'ca\
+\'ca\
+
+\f0\b REDIRECT 
+\f1\b0 \
+void redirect( char* command )\
+\{\
+\'ca\'ca\'ca\'ca\'ca int pipeline;\
+\'ca\'ca\'ca\'ca\'ca char rest[ 80 ];\
+\'ca\'ca\'ca\'ca\'ca int child, status;\
+\'ca\'ca\'ca\'ca\'ca char\'ca * comargv[ 10 ];\
+\'ca\'ca\'ca\'ca\'ca int inred, outred; /* Booleans to indicate whetherI/O redirection is used*/\
+\'ca\'ca\'ca\'ca\'ca char infile[ 16 ], outfile[ 16 ]; /* Filenames for I/O redirection */\
+\'ca\'ca\'ca\'ca\'ca int infd, outfd; /* File descriptors */\
+\'ca\'ca\'ca\'ca\'ca int err;\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca parse( command, comargv, &pipeline, rest, &inred, &outred, \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca infile, outfile );\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca if ( ( child = fork() ) != 0 ) \{ /* Parent shell executes here. */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca while ( child != wait( &status ) )\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca ;\
+\'ca\'ca\'ca\'ca\'ca \} /* end of if */\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca else \{/* child executes here */\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca if ( inred ) \{\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca infd = open( infile, 0 ); /* Open input file for redirect*/\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca dup2( infd, 0 ); /* duplicate the input fd on stdin */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( infd ) ; /* close input fd, stdin has the same*/\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \}/* end of if inred */\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca if ( outred ) \{\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca outfd = creat( outfile, 0644); /*open output file for redirect*/\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca dup2( outfd, 1 ); /* duplicate the output fd on stdout */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca close( outfd ); /* close outfd: it's not need any more*/\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \}/* end of if outred */\
+\'ca\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca err = execvp( command, comargv );\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca /* error checking.\'ca if 'command' is not a valid command. */\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca if ( err == -1 ) \{\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca fprintf( stderr, "bad command or file name\\n");\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca exit(0);\
+\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca\'ca \}\
+\'ca\'ca\'ca\'ca\'ca \}/* end of else */\
+\}\'ca\
+\'ca\
+
+\f0\b NOTE:
+\f1\b0 \
+\'ca\
+
+\f0\b \'ca\'ca\'ca Please write all your message/output either to standard output or to standard error. \cf2 Don't mix them\cf0 . Otherwise it will be hard for me to print the message/output in order.\'ca Thanks for your cooperation
+\f1\b0 \
+\'ca\
+ Return to the \cf3 CS 610 Home Page\cf0  }

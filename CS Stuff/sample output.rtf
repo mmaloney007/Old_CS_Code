@@ -1,0 +1,361 @@
+{\rtf1\mac\ansicpg10000\cocoartf100
+{\fonttbl\f0\fnil\fcharset102 SIL-Hei-Med-Jian;\f1\froman\fcharset77 TimesNewRomanPSMT;\f2\fnil\fcharset77 LastResort;
+}
+{\colortbl;\red255\green255\blue255;\red255\green0\blue0;\red0\green0\blue255;\red0\green255\blue255;
+}
+\margl1440\margr1440\vieww9000\viewh9000\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+
+\f0\fs32 \cf0 SAMPLE OUTPUT FOR PROGRAM 2
+\f1\fs24 \
+datafile1 contains 2 lines, 1440bytes.\
+\
+=============This line is the border, not part of the datafile ================\
+\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+0123456789012345678901234567890123456789012345678901234567890123456789012345678\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+01234567890123456789012345678901234567890123456789012345678901234567890123456789\
+0123456789012345678901234567890123456789012345678901234567890123456789012345678\
+\
+=============This line is the border, not part of the datafile ================\
+\
+In the following output, the cache and block size is set to:\
+\
+BLOCK_SIZE = 20\
+\
+CACHE_SIZE = 15\
+\
+You may assume that the command sequences after you invoke "xread" is in this format:\
+\
+Please enter file name:? filename\
+\
+Operation command: ? read|write starting_seek_address
+\f0 \'ca\'ca
+\f1 ? number_of_byte [ content ]\
+\
+content is presented only when the command is write and all data after the number_of_byte is taken as content but you only write the first number_of_byte Bytes\
+\
+
+\f0 \'a1\'a1
+\f1 \
+\
+To simplify it, you may assume:\
+\
+when you write data to a block, you overwrite number_of_byte data starting from starting_seek_address if number_of_byte + starting_seek_address < file_size.otherwise append to the end of the file.\
+\
+Please also dump the LRU list after each Operation Command. It may help you debug your code.\
+\
+Sample output\
+\
+cs610\{73\}: make\
+gcc -c xread.c\
+gcc -c cache.c\
+gcc -o xread xread.o cache.o\
+\
+cs610\{81\}: xread\
+\
+\
+Please enter file name: datafile1\
+Full path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+\
+\
+Operation command: read 0 53\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 0, 20 bytes from disk(cached in 0):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 1, 20 bytes from disk(cached in 1):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 2, 13 bytes from disk(cached in 2):\
+0123456789012\
+\
+LRU list\
+\
+3(NULL)->4(NULL)->5(NULL)->6(NULL)->7(NULL)->8(NULL)->9(NULL)->10(NULL)->11(NULL)->12(NULL)->13(NULL)->14(NULL)->\cf2 0(datafile1:0-19)->1(datafile1:20-39)->2(datafile1:40-9)\cf0 \
+\
+Please enter file name: datafile1\
+Full path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 25 75\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 1, 15 bytes from cache(cached in 1):\
+567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 2, 20 bytes from cache(cached in 2):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 3, 20 bytes from disk(cached in 3):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 4, 20 bytes from disk(cached in 4):\
+01234567890123456789\
+\
+LRU list\
+\
+5(NULL)->6(NULL)->7(NULL)->8(NULL)->9(NULL)->10(NULL)->11(NULL)->12(NULL)->13(NULL)->14(NULL)->0(datafile1:0-19)->\cf3 1(datafile1:20-39)->2(datafile1:40-59)\cf0 ->\cf2 3(datafile1:60-79)->4(datafile1:80-99)\cf0 \
+\
+Please enter file name: datafile1\
+Full path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 0 110\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 0, 20 bytes from cache(cached in 0):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 1, 20 bytes from cache(cached in 1):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 2, 20 bytes from cache(cached in 2):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 3, 20 bytes from cache(cached in 3):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 4, 20 bytes from cache(cached in 4):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 5, 10 bytes from disk(cached in 5):\
+0123456789\
+\
+LRU list\
+\
+6(NULL)->7(NULL)->8(NULL)->9(NULL)->10(NULL)->11(NULL)->12(NULL)->13(NULL)->14(NULL)->\cf3 0(datafile1:0-19)->1(datafile1:20-39)->2(datafile1:40-59)->3(datafile1:60-79)->4(datafile1:80-99\cf0 )->\cf2 5(datafile1:100-119)\cf0 \
+\
+Please enter file name: datafile1\
+Full path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 150 55\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 7, 10 bytes from disk(cached in 6):\
+0123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 8, 20 bytes from disk(cached in 7):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 9, 20 bytes from disk(cached in 8):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 10, 5 bytes from disk(cached in 9):\
+01234\
+\
+LRU list\
+\
+\
+(10 NULL) ->11(NULL)->12(NULL)->13(NULL)->14(NULL)->0(datafile1:0-19)->1(datafile1:20-39)->2(datafile1:40-59)->3(datafile1:60-79)->4(datafile1:80-99)->5(datafile1:100-119)->\cf2 6(datafile1:140-159)->7(datafile1:160-179)->8(datafile1:180-199)->9(datafile1:200-219)\cf0 \
+
+\f0 \'a1\'a1
+\f1 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 89 89\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 4, 11 bytes from cache(cached in 4):\
+90123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 5, 20 bytes from cache(cached in 5):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 6, 20 bytes from disk(cached in 10):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 7, 20 bytes from cache(cached in 6):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 8, 18 bytes from cache(cached in 7):\
+012345678901234567\
+\
+LRU list\
+\
+11(NULL)->12(NULL)->13(NULL)->14(NULL)->0(datafile1:0-19)->1(datafile1:20-39)->2(datafile1:40-59)->3(datafile1:60-79)->8(datafile1:180-199)->9(datafile1:200-219)->\cf3 4(datafile1:80-99)->5(datafile1:100-119)\cf0 ->\cf2 10(datafile1:120-139)\cf0 ->\cf3 6(datafile1:140-159)->7(datafile1:160-179)\cf0 \
+
+\f0 \'a1\'a1
+\f1 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 200 150\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 10, 20 bytes from cache(cached in 9):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 11, 20 bytes from disk(cached in 11):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 12, 20 bytes from disk(cached in 12):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 13, 20 bytes from disk(cached in 13):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 14, 20 bytes from disk(cached in 14):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 15, 20 bytes from disk(cached in 0):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 16, 20 bytes from disk(cached in 1):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 17, 10 bytes from disk(cached in 2):\
+0123456789\
+\
+LRU list\
+\
+3(datafile1:60-79)->8(datafile1:180-199)->4(datafile1:80-99)->5(datafile1:100-119)->10(datafile1:120-139)->6(datafile1:140-159)->7(datafile1:160-179)->\cf3 9(datafile1:200-219)\cf0 ->\cf2 11(datafile1:220-239)->12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)\cf0 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 40 59\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 2, 20 bytes from disk(cached in 3):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 3, 20 bytes from DISK(cached in 8):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 4, 19 bytes from cache(cached in 4):\
+0123456789012345678\
+\
+LRU list\
+\
+5(datafile1:100-119)->10(datafile1:120-139)->6(datafile1:140-159)->7(datafile1:160-179)->9(datafile1:200-219)->11(datafile1:220-239)->12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)->\cf2 3(datafile1:40-59)->8(datafile1:60-79)\cf0 ->\cf3 4(datafile1:80-99)\cf0 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 40 76\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 2, 20 bytes from cache(cached in 3):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 3, 20 bytes from cache(cached in 8):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 4, 20 bytes from cache(cached in 4):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 5, 16 bytes from cache(cached in 5):\
+0123456789012345\
+\
+LRU list\
+\
+10(datafile1:120-139)->6(datafile1:140-159)->7(datafile1:160-179)->9(datafile1:200-219)->11(datafile1:220-239)->12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)->\cf3 3(datafile1:40-59)->8(datafile1:60-79)->4(datafile1:80-99)->5(datafile1:100-119)\cf0 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: write 158 15 abcdefghijklmno\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 7, 2 bytes to cache(cached in 6):\
+012345678901234567ab\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 8, 13 bytes to cache(cached in 7):\
+cdefghijklmno3456789\
+
+\f2 \U63616 \uc0 \u63616 
+\f1 @\
+\
+LRU list\
+\
+10(datafile1:120-139)->9(datafile1:200-219)->11(datafile1:220-239)->12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)->3(datafile1:40-59)->8(datafile1:60-79)->4(datafile1:80-99)->5(datafile1:100-119)->\cf3 6(datafile1:\cf4 140-159\cf3 )->7(datafile1:\cf4 160-179\cf3 )\cf0 \
+\
+
+\f0 \'a1\'a1
+\f1 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 150 200\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 7, 10 bytes from cache(cached in 6):\
+01234567ab\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 8, 20 bytes from cache(cached in 7):\
+cdefghijklmno56789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 9, 20 bytes from DISK(cached in 10):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 10, 20 bytes from cache(cached in 9):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 11, 20 bytes from cache(cached in 11):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 12, 20 bytes from cache(cached in 12):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 13, 20 bytes from cache(cached in 13):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 14, 20 bytes from cache(cached in 14):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 15, 20 bytes from cache(cached in 0):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 16, 20 bytes from cache(cached in 1):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 17, 10 bytes from cache(cached in 2):\
+0123456789\
+\
+LRU list\
+\
+3(datafile1:40-59)->8(datafile1:60-79)->4(datafile1:80-99)->5(datafile1:100-119)->\cf3 6(datafile1:\cf4 140-159\cf3 )->7(datafile1:\cf4 160-179\cf3 )->\cf2 10(datafile1:180-199)\cf0 ->\cf3 9(datafile1:200-219)->11(datafile1:220-239)->12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)\cf0 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 0 100\
+\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 0, 20 bytes from DISK(cached in 3):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 1, 20 bytes from DISK(cached in 8):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 2, 20 bytes from DISK(cached in 4):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 3, 20 bytes from DISK(cached in 5):\
+01234567890123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 4, 20 bytes from DISK(cached in 6):\
+01234567890123456789\
+\
+LRU list\
+\
+7(datafile1:\cf4 160-179\cf0 )->10(datafile1:180-199)->9(datafile1:200-219)->11(datafile1:220-239)->12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)->\cf2 3(datafile1:0-19)->8(datafile1:20-39)->4(datafile1:40-59)->5(datafile1:60-79)->6(datafile1:80-99)\cf0 \
+\
+\cf2 Note: Before you replace the dirty cache block 6, you need to write data to disk 
+\f0 \cf0 \'a1\'a1
+\f1 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: write 110 20 ABCDEFGHIJKLMNOPQRST\
+\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 5, 10 bytes TO cache(cached in 7):\
+0123456789ABCDEFGHIJ\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 6, 10 bytes TO cache(cached in 10):\
+KLMNOPQRST0123456789\
+
+\f2 \U63616 \uc0 \u63616 
+\f1 @\
+\
+LRU list\
+\
+9(datafile1:200-219)->11(datafile1:220-239)->12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)->3(datafile1:0-19)->8(datafile1:20-39)->4(datafile1:40-59)->5(datafile1:60-79)->6(datafile1:80-99)->\cf2 7(datafile1:\cf4 100-119\cf2 )->10(datafile1:\cf4 120-139\cf2 )\cf0 \
+\
+\cf2 Note: Before you replace the dirty cache block 7, you need to write data to disk, cache block 7, 10 are now dirty\cf0 \
+\
+Please enter file name: datafile1\
+Real path is /n/m/31/cs610/assigns/data-3/datafile1\
+/n/m/31/cs610/assigns/data-3/datafile1 has size: 1440 bytes.\
+Operation command: read 100 80\
+\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 5, 20 bytes from cache(cached in 7):\
+0123456789ABCDEFGHIJ\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 6, 20 byte from cache(cached in 10):\
+KLMNOPQRST0123456789\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 7, 20 bytes from DISK(cached in 9):\
+012345678901234567ab\
+"/n/m/31/cs610/assigns/data-3/datafile1" block 8, 20 byte from DISK(cached in 11):\
+cdefghijklmno56789\
+
+\f0 \'a1\'a1
+\f1 \
+\
+LRU list\
+\
+12(datafile1:240-259)->13(datafile1:260-279)->14(datafile1:280-299)->0(datafile1:300-319)->1(datafile1:320-339)->2(datafile1:340-359)->3(datafile1:0-19)->8(datafile1:20-39)->4(datafile1:40-59)->5(datafile1:60-79)->6(datafile1:80-99)->\cf3 7(datafile1:\cf4 100-119\cf3 )->10(datafile1:\cf4 120-139\cf3 )\cf2 ->9(datafile1:140-159)->11(datafile1:160-179)\cf0 \
+\
+
+\f0 \'a1\'a1
+\f1 \
+\
+Please enter file name: NO_FILE\
+\
+Program Terminated!\
+\
+Before you quit the program, please write back all dirty data back to disk.\
+\
+Note:\
+\
+You need to dump the LRU content after each command( see the above sample output, \cf2 red\cf0  means "from disk", \cf3 blue\cf0  means "already in cache",\cf4 100-119 \cf0 means "dirty block" )\
+\
+To make tshe grading easier,\
+\
+please terminate your program if the filename entered is: NO_FILE\
+\
+please set CACHE_SIZE=15 BLOCK_SIZE=20, but define them at compile time.\
+}

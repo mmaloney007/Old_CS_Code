@@ -1,0 +1,30 @@
+This directory contains the as611 system.
+
+as611 is a simple assemble-and-execute environment for Alpha
+programs.
+
+To build as611: copy all the files in this directory to
+a clean directory and type "make".
+
+To run as611: as611 file.s
+
+as611 supports the instructions described in the "Alpha subset"
+document, available from the assignment webpage.
+
+as611 does not support any of the standard Alpha assembler directives.
+
+as611 does support some as611-specific directives:
+
+    1. !exec: execute the code assembled so far. location 0 is
+              assumed to contain an Alpha function. This will only
+              work when run on an Alpha processor.
+
+    2. !dump: dump the code assembled so far.
+
+as611 does support Alpha-style comments (# comment....).
+
+Only a stub is being distributed for assemble.c. Object files are
+being distributed for this file for Alpha and Linux machines.
+
+This directory contains some test Alpha assembler inputs for as611.
+In particular, see fact.s which computes factorial(10).

@@ -1,0 +1,127 @@
+			Victor Maloney CS 515 Assignment 2
+				Binary Search Tree
+
+	This purpose of this assignment was to creat a binary search tree.  It
+was to contain the operations insert, delete, height, a constructor, so I
+assumed a destructor, Preorder travesal (output), Inorder traversal (output),
+and averagedepth.  All of these were to be written recursively and tested.  
+Any other functions you thought neccessary you could make.  The data members
+were to be a stuct with a key (an int) and two pointers a left (pointer of 
+the same structure) and a right (pointer of the same structure).  Also a root
+pointer.  
+	struct tnode{
+		int k;
+		tnode *left;
+		tnode *right;
+	};
+	tnode *t;
+(Above the data members instructed to have.)
+	This was an unbalanced binary search tree so it could end up highly
+unbalanced and basically be a linked list.  I wrote a test driver that 
+inserted 12 random keys.  Showed the order inserted in then showed the pre and
+inorder traversals of the tree.  It then deletes a key and shows the pre / in-
+order traversals of the tree.  After that another for loop inserts another
+four hundred and eighty-eight keys.  It then outputs the height and average 
+depth functions.
+
+This was the test driver:
+
+//Victor Maloney Cs 515 Assignment 2
+
+/*
+	This is simply a test harness for a binary search tree class.
+	It inserts five hundred nodes and outputs the average depth and 
+	the height of the tree.
+	It has one for loop and that is it.
+*/
+
+#include <iostream.h>
+#include <stdlib.h>
+#include "BST.h"
+
+int main()
+{
+	//two ints and a tree
+	BST tree;
+	int i;
+	int time;
+
+	cout << "Order Inserted in: \n";
+	//test loop inserts 12 nodes into the tree
+	for(time = 0; time < 12; time++)
+	{
+		i = rand()%10000;
+		tree.insert(i);
+		cout << i << ' ';
+	}
+
+	//This simply tests the outputs for the tree
+	cout << '\n';
+	cout << "\nPreorder Output \n";
+	tree.preorder();
+	cout << "\n\n";
+	cout << "Inorder Output \n";
+	tree.inorder();
+	cout << "\n\n";
+
+	//Tests the classes deleteing capabilites
+	cout << "Deleting " << i << ": \n";
+	tree.deleteit(i);
+	cout << "\nPreorder Output \n";
+	tree.preorder();
+	cout << "\n\n";
+	cout << "Inorder Output \n";
+	tree.inorder();
+	cout << "\n\n";
+	
+	//finishes inserting 488 more nodes to test average depth and 
+	//height
+	for(time = 12; time < 500; time++)
+	{
+		i = (rand()%10000);
+		tree.insert(i);
+	}
+
+	//outputs the trees height and average depth as asked
+	cout << "Height is: \n";
+	cout << tree.height();
+	cout << '\n';
+	cout << "\nAverage Depth is: \n";
+	cout << tree.averagedepth();
+	cout << "\n\n";
+
+	return 0;
+}
+
+This was the output from the test driver:
+
+
+Order Inserted in: 
+6838 5758 113 7515 1051 5627 3010 7419 6212 4086 2749 2767 
+
+Preorder Output 
+6838 5758 113  * 1051  * 5627 3010 2749  * 2767  *  * 4086  *  *  * 6212  *  * 7515 7419  *  *  * 
+
+Inorder Output 
+ * 113  * 1051  * 2749  * 2767  * 3010  * 4086  * 5627  * 5758  * 6212  * 6838  * 7419  * 7515  * 
+
+Deleting 2767: 
+
+Preorder Output 
+6838 5758 113  * 1051  * 5627 3010 2749  *  * 4086  *  *  * 6212  *  * 7515 7419  *  *  * 
+
+Inorder Output 
+ * 113  * 1051  * 2749  * 3010  * 4086  * 5627  * 5758  * 6212  * 6838  * 7419  * 7515  * 
+
+Height is: 
+23
+
+Average Depth is: 
+11.3415
+
+	As you can see the height is far from a balanced binary search tree.
+The optimal height for a five hundred node binary search tree would be about
+nine (2^9 = 512) so a height of twenty three is way off from perfect.  Also
+you will notice that the average depth is also higher than nine meaning that
+the tree is probably unbalanced to one side.  This tree is about two and a half
+times worse than a balanced binary search tree.

@@ -1,0 +1,1050 @@
+(* Victor Maloney Assignment 7 *)
+(* October 25, 2001 *)
+(* CS 671 Fall 2001 *)
+(* Time-stamp: <24 Oct 2001 at 12:34:28 by charpov on berlioz.cs.unh.edu> *)
+
+signature ORDER = sig
+    type t
+    val eq : t * t -> bool
+    val less : t * t -> bool
+end
+
+signature EQ = sig
+    type t
+    val eq : t * t -> bool
+end
+
+(* Exercise 1 *)
+functor FsetList (E : EQ) : BASICFSET = struct
+type elem = E.t
+type set = elem list
+
+val eq = E.eq
+
+(* set functions *)
+fun isEmpty [] = true
+| isEmpty _ = false;
+
+(* set to a list *)
+fun toList [] = []
+| toList (l as (x::t)) = l;
+
+(* set from a list *)
+fun fromList [] = []
+| fromList (l as (x::t)) = l;
+
+(* length of a set *)
+fun size [] = 0
+| size (x::t) = length (x::t);
+
+(* empty set *)
+fun emptySet n = [];
+
+(* insert *)
+val insert = op ::
+
+(* unoin of two set *)
+val union = op @
+
+(* epsilon *)
+fun epsilon [] = NONE
+| epsilon (x::t) = SOME x
+
+(* member of two set *)
+fun member(x,s) = List.exists (fn y => eq(x,y)) s
+
+(* Tests if one is a subset of the other *)
+fun subset(s,t) = subset(s,t) andalso subset(t,s)
+
+(* Intersect of two Sets *)
+fun intersect(s,t) = List.filter (fn x => member(x,s)) t
+
+(* difference of two sets *)
+fun diff(s,t) = List.filter (fn y => not(member(y,t))) s
+
+(* Subset *)
+fun subset (s,t) = List.all (fn x => member (x,s)) t
+
+(* equality on sets *)
+fun equal (s,t) = subset(s,t) andalso subset(t,s)
+
+(* Remove a element *)
+fun remove(x,s) = List.filter (fn y => not(eq(x,y))) s
+
+(* set from a list *)
+fun toList l =
+   let fun st [] r = r
+       | st (x::t) r = st t (if member(x,t) then r else x::r)
+   in st l []
+   end
+
+(* make the list faster some how *)
+fun study l = l 
+
+(* addList to the set *)
+val addList = op @
+
+end
+
+(* Exercise 2 *)
+
+functor FsetSorted (O : ORDER) : BASICFSET = struct
+type elem = O.t
+type set = elem list
+
+val eq = O.eq
+val less = O.less 
+
+open List
+local
+
+fun find x [] = (false,0)
+    | find x (s as h::t)  =
+    let fun f i j = 
+            if less(nth(s,j-1),x) then (false,j)
+            else if i+1 >= j then (eq(x,nth(s,i)), i)
+            else let val k = i + (j-i) div 2
+                     val y = nth (s,k) in
+                         if less(x,y) then f i k
+                         else if less(y,x) then f k j
+                         else (true, k)
+                      end
+            in
+               if less(x,h) then (false,0)
+               else f 0 (length s)
+            end
+in 
+
+fun emptySet n = []
+
+val isEmpty = null
+
+fun fromList x = x
+
+fun size x = List.length(x)
+
+fun epsilon [] = NONE
+| epsilon (x::_) = SOME x
+
+fun member (x,s) = List.exists (fn y => eq(x,y)) s
+
+fun subset (s,t)  = List.all (fn x => member(x,t)) s
+
+fun diff(s,t) = List.filter (fn x => not(member(x,t))) s
+
+fun equal (s,t) = subset(s,t) andalso subset(t,s)
+
+fun remove(x,s) = List.filter (fn y => not(eq(x,y))) s
+
+fun intersect(_,[]) = []
+| intersect([],_) = []
+| intersect(a as x::s, b as y::t) =
+  if less(x,y) then intersect(s,b)
+  else if less(y,x) then intersect(a,t)
+  else x::intersect(s,t)
+
+fun insert(x,s) =
+    case find x s of 
+    (true,_) => s
+    | (false,i) => take(s,i)@[x]@drop(s,i)
+
+fun diff([],_) = []
+| diff (s,[]) = s
+| diff (a as x::s,b as y::t) =
+  if less(x,y) then x::diff(s,b)
+  else if less(y,x) then x::diff(a,t)
+  else diff(s,t)
+
+fun union (s,[]) = s
+| union ([],t) = t
+| union (a as x::s,b as y::t) =
+  if less(x,y) then x::union(s,b)
+  else if less(y,x) then y::union(a,t)
+  else x::union(s,t)
+
+fun addList (s,[]) = s
+| addList (s,(x::t)) = addList (insert(x,s),t)
+end
+
+fun study l = l
+
+fun toList s = s
+
+end
+
+(* Exercise 3 *)
+functor NFsetArray (E : EQ) : BASICNFSET = struct
+
+type elem = E.t
+type set = elem option array
+
+val eq = E.eq
+
+exception SetIsFull of int
+
+datatype Search = Found of int | Free of int | Full
+
+open Array
+
+(* Find function that finds the values in arrays *)
+
+fun find (x,S) =
+  let val n = length S
+    fun try i r =
+      if i=n then r
+      else case (r,sub(S,i)) of
+        (Full, NONE) => try (i+1) (Free i)
+       |(r,NONE) => try (i+1) r
+       |(r,SOME y) => if eq(x,y) then Found i
+                      else try (i+1) r
+   in 
+     try 0 Full
+   end
+
+(* Flush Left *)
+fun flushLeft A =
+    let val n = length A
+    val B = array (n, NONE)
+    fun iter i p =
+        if i=n then ()
+        else case sub (A,i) of
+           NONE => iter (i+1) p
+           | SOME x => (update (B, p,SOME x); iter (i+1) (p+1))
+in
+      iter 0 0
+end
+
+(* to List takes a set and returns a list of the set *)
+
+local
+  fun toListh A n p l =
+  if (n>p) then
+  case sub (A,p) of
+  NONE => toListh A n (p+1) l
+  | SOME x => toListh A n (p+1) (x::l)
+  else (List.rev l)
+in
+  fun toList A = toListh A (Array.length A) 0 []
+end
+
+(* Returns the size of a set as an int *)
+
+fun size A =
+  let val n = (Array.length A)
+  fun sizeh A n p =
+  if (p<n) then
+  case sub(A,p) of
+  NONE => p
+  | y => sizeh A n (p+1) 
+  else p
+in
+  sizeh A n 0
+end
+
+(* Inserts a value into the set throws an exception if the set is already full *)
+
+fun insert (x,A) = 
+      case find (x, A) of
+      Free p => update(A,p,SOME x)
+      | Found p => ()
+      | Full => raise SetIsFull(size A)
+
+(* Extends a set *)
+
+fun extend (s,s') =
+ let val p = toList s'
+ fun extendh ([],s) = ()
+ | extendh (x::t,s) = (insert (x,s); extendh (t,s))
+in
+  extendh (p,s)
+end
+
+(* Removes a value from the SET and does nothing if it is not there *)
+fun remove (x,A : elem option array) = 
+    let fun remhelp (x,A) =
+    case find (x, A) of
+    Free p => ()
+    | Found p => update(A,p,NONE)
+    | Full => ()
+in
+   remhelp (x,A);
+   flushLeft (A)
+end
+
+(* Reduces a set s by removing a set s' of elements *)
+
+fun reduce (s,s') =
+  let val p = toList s'
+  fun removeh ([],s) = ()
+  | removeh (x::t,s) = (remove (x,s); removeh (t,s))
+in
+  removeh (p,s)
+end
+
+(* emptySet takes a hint to the size as parameter *)
+
+fun emptySet n = array (n,NONE);
+
+(* Returns the union of the set and all the elements of the list *)
+(* Also has a helper function fromList *)
+
+local 
+  exception ErrorInFromList 
+  fun fromListh A [] = A
+  | fromListh A (x::t) =
+  case find (x, A) of
+  Found p => fromListh A t
+  | Free p => (insert(x,A);fromListh A t)
+  | Full => raise ErrorInFromList 
+in
+  fun fromList t = fromListh (emptySet (List.length t)) t
+end  
+
+fun addList (S,L) = extend (S,fromList L)
+
+(* member(x,s) tests if x is a member of set s *)
+
+fun member (x,s) = 
+   case find (x, s) of
+   Free p => false
+   | Full => false
+   | Found p => true
+
+(* Tests if (s,s') is s is a subset of s' *)
+
+fun subset (s,t) =
+   let val m = toList s
+   fun subseth ([],r) = true 
+   | subseth (x::t,r) = 
+   if (member (x,r)) then subseth(t,r)
+   else false 
+  in
+    subseth (m,t)
+end
+
+
+(* Returns true if to sets are equal and false if they are not *)
+
+fun equal (s,t) = subset (s,t) andalso subset (t,s)
+
+
+(* Returns the difference of two sets *)
+
+fun restrict (s,t) = flushLeft(fromList(List.filter (fn x => member(x,t)) (toList s)))
+
+
+(* Hilbert epsilon operator.  Returns NONE only for empty set *)
+(* Satisfies member(valOf(epsilon s), s) for nonempty s *)
+
+fun epsilon S =   
+  let val x = (sub(S,0))
+in
+  flushLeft S;
+  x
+end
+
+(* isEmpty operator = not o isSome o epsilon *)
+
+fun isEmpty S =
+if (isSome(epsilon S)) then false
+else true
+
+fun dup S =
+    let val S' = array(length S, NONE)
+    in 
+        copy {src=S, si=0, dst=S', di=0, len=NONE}; S'
+    end
+
+fun copy(A,B) =
+    let val a = length A
+        val b = length B
+        (* mkcopy makes the actual copy *)
+        fun mkcopy n = Array.copy {src=A, si=0, dst=B, di=0, len=SOME n}
+    in 
+        if b >= a then (* Destination array is larger *)
+            (Array.modifyi (fn (_,x) => NONE) (B,a,NONE);(* Empty rest of it *)
+             mkcopy a) (* Make copy of A, including holes *)
+        else if size A >= b then raise SetIsFull(b-1) (* Too many elts in A *)
+        (* Move elements to the left of A, copy them (and enough holes
+         * to empty B); A is actually modified into an equivalent set *)
+        else (flushLeft A; mkcopy b)
+    end
+
+val study = flushLeft
+        
+end
+
+(* Some stuff, useful for both F and NF tests *)
+
+structure Utils : sig
+    val randInt : int * int option -> int   (* random numbers *)
+    val randWord : int -> string            (* random strings *)
+    val apply : (unit -> bool) list -> unit (* applies a list of tests *)
+end = struct
+
+val t = Time.now()
+val rd = Random.rand (Date.yearDay(Date.fromTimeLocal t), 
+                      Int32.toInt(Time.toSeconds t))
+
+(* A random number between a and b *)
+fun randInt(a,NONE) = (case Int.maxInt of
+                           NONE => randInt(a,SOME 1073741823) (* 2^30 - 1 *)
+                         | x => randInt(a,x))
+  | randInt(a,SOME b) = Random.randRange(a,b) rd
+
+(* Randoms words of length at least 1 and at most n *)
+fun randWord n = 
+    let fun f 0 s = s
+          | f n s = f (n-1) (s^str(chr(randInt(65,SOME 90))))
+    in f n ""
+    end
+
+local
+  fun perf f = 
+   let val rt = Timer.startRealTimer()
+       val y = f()
+      in Bool.toString(y)^" "^(Real.toString(Time.toReal(Timer.checkRealTimer rt) * 1000.0))
+      end
+  fun applyh [] n = ()
+  | applyh (x::t) n = (print("test "^(Int.toString n)^" "^perf(x)^" seconds\n");applyh t (n+1)) 
+in
+  fun apply l = applyh l 1 
+end
+
+end
+
+(* Exercise 4 *)
+signature IntFSet = BASICFSET where type elem = int
+signature StrFSet = BASICFSET where type elem = string
+
+functor FTest (structure IntSet : IntFSet and StrSet : StrFSet) = struct
+
+open Utils
+
+(* Test example *)
+local
+    open StrSet
+    val s = insert ("foo", emptySet NONE)
+in
+fun test01 () = size s = 1 andalso isEmpty(remove("foo",s))
+end
+
+(* FUNCTIONAL TEST *)
+local 
+   open IntSet
+   val y = 1000
+   val y' = 1000 
+   val l = List.tabulate(y,fn x => x)
+   val l' = List.tabulate (y', fn x => x+400)
+   val s = addList(emptySet NONE,l)
+   val s' = addList(emptySet NONE, l')
+in
+   fun testvmf() = equal(union(union(diff(s',s),diff(s,s')),intersect(s',s)),union(s',s)) andalso size(diff(s',s)) < size(intersect(s',s)) andalso not(equal(diff(s',s),diff(s,s')))
+end
+
+(*code of other examples*)
+
+(* Apply a selection of tests *)
+fun run() = apply [test01,testvmf  (*, ... more tests here *)]
+
+end
+
+(* Exercise 5 *)
+signature IntNFSet = BASICNFSET where type elem = int
+signature StrNFSet = BASICNFSET where type elem = string
+
+functor NFTest (structure IntSet : IntNFSet and StrSet : StrNFSet) = struct
+
+open Utils
+
+(* Test example *)
+local
+    open IntSet
+    val N = 10000
+    val bigList = List.tabulate(N, fn _ => randInt(0,NONE))
+    val s = emptySet N
+    val s1 = emptySet N
+    val s2 = emptySet N
+    fun slowClear () =
+        if isEmpty s1 then ()
+        else let val SOME x = epsilon s1 in (* nonexhaustive but ok *)
+                 remove(x,s1);
+                 insert(x,s2);
+                 slowClear()
+             end
+in
+fun test01 () = (addList(s,bigList);
+                 extend(s1,s); (* now s1 is big and same as s *)
+                 slowClear(); (* move everything from s1 to s2 *)
+                 equal(s,s2) andalso not(isSome(epsilon(s1))))
+end
+
+(* NON FUNCTIONAL TEST *)
+local
+   open IntSet
+   val y = 1000
+   val l = List.tabulate(y,fn x => x)
+   val l' = List.tabulate (y, fn x => x+400)
+   val s = emptySet y
+   val s' = emptySet y
+   val p = emptySet y
+   val p' = emptySet y
+in
+  fun testvmnf() = (addList(s,l);addList(s',l');addList(p,l);addList(p',l');reduce(p,s');restrict(p',s);extend(p',p);extend(p,p');equal(p',p)) 
+end
+
+(* Apply a selection of tests *)
+fun run() = apply [test01,testvmnf  (*, ... more tests here *)]
+
+end
+
+(* Exercise 6 *)
+
+structure IntElem = struct (* integers that can be used as set elements *)
+type t = int
+val eq = op =
+val less = Int.<
+fun hash x = x
+end
+
+structure StrElem = struct (* strings that can be used as set elements *)
+type t = string
+val eq = op =
+val less = String.<
+fun hash x = foldl (fn (x,y) => (y mod 9999991)*97+x) 0 
+                   (List.map ord (explode x))
+end
+
+structure SomeFTest = FTest(structure IntSet = FsetList(IntElem)
+                            and StrSet = FsetList(StrElem))
+
+structure SomeNFTest = NFTest(structure IntSet = SetF2NF(FsetList(IntElem))
+                              and StrSet = SetF2NF(FsetList(StrElem)))
+
+(* basic btree code *)
+structure Btree : BASICBTREE = struct
+
+datatype 'a t = EmptyTree | Node of 'a * 'a t * 'a t
+
+(* an empty exception for the trees *)
+exception Empty
+
+(* Accessors *)
+(* gives the left side of a tree *)
+fun left EmptyTree = raise Empty
+| left (Node(x,l,r)) = l
+
+(* gives the right branch of the tree *)
+fun right EmptyTree = raise Empty
+| right (Node(x,l,r)) = r
+
+(* gives the root element *)
+fun root EmptyTree = raise Empty
+| root (Node(x,l,r)) = x
+
+(*Characteristics *)
+(* tells if a tree is empty or not *)
+fun isEmpty EmptyTree = true
+| isEmpty (Node(x,l,r)) = false
+
+(* gives the size of a tree "number of nodes" *)
+fun size EmptyTree = 0
+| size (Node(x,l,r)) = size l + size r + 1
+
+(* gives the depth of a tree *)
+fun depth EmptyTree = 0
+| depth (Node(x,l,r)) = Int.max(depth l, depth r) + 1
+
+(* gives all the nodes at a certain depth *)
+fun atDepth EmptyTree _  = []
+| atDepth _ 0 = []
+| atDepth (Node(x,_,_)) 1 = [x]
+| atDepth (Node(_,l,r)) n = atDepth l (n-1) @ atDepth r (n-1)
+
+(* finds if a tree is balanced/AVL or not *)
+local
+  exception UnBalanced
+  fun bal _ EmptyTree = 0
+  | bal f (Node(_,l,r)) =
+    let val (L,R) = (bal f l, bal f r)
+    in if abs(L - R) <= 1 then f(L,R)+1 else raise UnBalanced
+    end
+in
+  fun isBalanced t = (bal (op +) t; true) handle Unbalanced => false
+  fun isAVL t = (bal (Int.max) t; true) handle Unbalanced => false
+end
+
+(* gives a list of leaves for a binary tree *)
+fun leaves EmptyTree = []
+| leaves (Node(x,EmptyTree,EmptyTree)) = [x]
+| leaves (Node(x,l,r)) = leaves(l)@leaves(r)
+
+(* gives the string form of a binary tree *)
+fun toString(root,left,right,leaf) f sep tree =
+    let fun mk _ _ EmptyTree acc = acc
+        | mk pad com (Node(x,l,r)) acc =
+        let val mk' = mk (pad^sep)
+            val acc' = acc^pad^(f x)^com
+         in case (l,r) of
+                 (EmptyTree,EmptyTree) => acc'^leaf^"\n"
+               | (EmptyTree,_) => mk' right r (acc'^"\n")
+               | (_,EmptyTree) => mk' left r (acc'^"\n")
+               | _ => mk' " " r (mk' " " l (acc'^"\n"))
+        end
+        in mk " " root tree " "
+        end
+
+(* iterators *)
+
+(* maps a funtion to a binary tree *)
+fun map f EmptyTree = EmptyTree
+| map f (Node(x,l,r)) = (Node(f(x),map f l,map f r))
+
+(* sees if the function is true for all nodes on a binary tree *)
+fun all f EmptyTree = true
+| all f (Node(x,l,r)) = f(x) andalso all f l andalso all f r
+
+(* implements the function exists on a binary tree *)
+fun exists f EmptyTree = false
+| exists f (Node(x,l,r)) = f(x) orelse exists f l orelse exists f r
+
+(* misc. *)
+(* reverses a binary tree *)
+fun rev EmptyTree = EmptyTree
+| rev (Node(x,l,r)) = (Node(x,rev r,rev l))
+end
+
+functor FsetTree (O : ORDER) : BASICFSET = struct
+
+type elem = O.t
+type set = elem Btree.t
+val eq = O.eq
+
+infix << val op << = O.less
+
+open Btree
+
+local (* remove *)
+    fun deleteMax (Node(x,l,EmptyTree)) = (x,l) (* tree cannot be empty *)
+      | deleteMax (Node(x,l,r)) =
+        let val (x',r') = deleteMax r
+        in (x', Node(x,l,r'))
+        end
+in
+fun remove(_,EmptyTree) = EmptyTree
+  | remove(x,Node(y,l,r)) =
+    if x<<y then Node(y, remove(x,l), r)
+    else if y<<x then Node(y, l, remove(x,r))
+    else case (l,r) of
+             (EmptyTree,r) => r
+           | (l,EmptyTree) => l
+           | (l,r) =>
+             let val (x',l') = deleteMax l
+             in Node(x',l',r)
+             end
+end
+local (* order HAS to be "in" *) fun toListIn t =
+        let fun f EmptyTree acc = acc
+              | f (Node(y,l,r)) acc = f l (y :: f r acc)
+        in f t []
+        end
+
+    fun fromListIn [] = EmptyTree
+      | fromListIn l =
+        let val n = List.length l div 2
+            val x::t = List.drop(l,n) (* non exhaustive but ok *)
+        in Node(x, fromListIn (List.take(l,n)), fromListIn t)
+        end
+in
+val toList = toListIn
+fun study t = fromListIn (toListIn t) (* rebalances the tree *)
+fun filter p t = fromListIn (List.filter p (toListIn t))
+
+(* Equality on elements *)
+val eq = O.eq
+
+(* Tests to see if x is a member of s *)
+
+fun member (x,s) = List.exists (fn y => eq(x,y)) (toListIn s)
+
+(* tests to see if s is a subset of t *)
+
+fun subset (s,t) = List.all (fn x => member (x,t)) (toListIn s)
+
+(* tests to see if s and t are equal *)
+
+fun equal (s,t) = subset (s,t) andalso subset (t,s)
+
+(* Returns the insterection of s and t *)
+
+fun intersect (s,t) = fromListIn(List.filter (fn x => member(x,t)) (toListIn s))
+
+(* Returns the difference of s and t *)
+
+fun diff (s,t) = fromListIn(List.filter (fn x => not(member(x,t))) (toListIn s))
+end
+
+
+fun emptySet n = EmptyTree
+
+(* return an element of the set *)
+
+fun epsilon EmptyTree = NONE
+| epsilon (Node(x,_,_)) = SOME x
+
+(* inserts a element into the tree *)
+
+fun insert (x,EmptyTree) = (Node(x,EmptyTree,EmptyTree))
+|   insert (x,(T as (Node(y,left,right)))) =
+    if (x<<y) then (Node(y,(insert (x,left)),right))
+    else if (y<<x) then (Node(y,left,(insert (x, right))))
+    else T (* x = y do nothing *)
+(* gives the union of set S and set T *)
+(* adds list of elements l to set T *)
+
+local
+  fun unh [] T = T
+  | unh (x::t) T = unh t (insert (x,T))
+in
+  fun union (S,T) = unh (toList S) T
+  fun addList (T,l) = unh l T
+end
+end
+
+structure SomeFTestTree = FTest(structure IntSet = FsetTree(IntElem)
+                            and StrSet = FsetTree(StrElem))
+
+structure SomeNFTestTree = NFTest(structure IntSet = SetF2NF(FsetTree(IntElem)) and StrSet = SetF2NF(FsetTree(StrElem)))
+
+structure SomeFTestSL = FTest(structure IntSet = FsetSorted(IntElem) and StrSet = FsetSorted(StrElem))
+
+structure SomeNFTestSL = NFTest(structure IntSet = SetF2NF(FsetSorted(IntElem)) and StrSet = SetF2NF(FsetSorted(StrElem)))
+
+functor ArraySet (E : EQ) : BASICNFSET = struct
+
+type elem = E.t
+type set = elem option array
+
+exception SetIsFull of int
+
+val eq = E.eq
+
+datatype Search = Found of int | Free of int | Full
+
+open Array
+
+(* Flush all nones to the right *)
+
+fun flushLeft S =
+    let val n = length S 
+    fun firstNone i =
+        if i = n then NONE 
+        else case sub(S,i) of 
+                  NONE => SOME i
+                | _ => firstNone (i+1)
+   fun move i j =
+       if j=n then ()
+       else case sub(S,j) of 
+            NONE => move i (j+1)
+          | v => (update (S,i,v); move (i+1) (j+1))
+   in
+      case firstNone 0 of
+           NONE => ()
+         | (SOME i) => move i (i+1)
+end
+
+(* Find function that finds the values in arrays *)
+
+fun find(x,S) =
+    let val n = length S
+        fun try i r = 
+            if i=n then r
+            else case (r,sub(S,i)) of
+                 (Full,NONE) => try (i+1) (Free i)
+               | (r,NONE) => try (i+1) r
+               | (r,SOME y) => if eq (x,y) then Found i
+                                else try (i+1) r
+   in
+      try 0 Full
+   end
+
+(* to List takes a set and returns a list of the set *)
+
+local
+  fun cons(NONE, l) = l
+  | cons (SOME x, l) = x::l
+in
+  fun toList S = foldr cons [] S
+end
+
+(* Returns the size of a set as an int *)
+
+fun size S =
+    let fun f (NONE, x) = x
+          | f (SOME _, x) = x+1
+    in
+     foldl f 0 S
+    end 
+
+(* Inserts a value into the set throws an exception if the set is already full *)
+
+fun insert (x,S) = 
+    case find (x,S) of 
+     Full => raise SetIsFull (length S)
+   | Free i => update (S,i, SOME x)
+   | _ => ()
+
+(* Extends a set *)
+fun extend (s,s') =
+    let fun ins NONE = ()
+        | ins (SOME x) = insert (x,s)
+   in 
+    app ins s'
+   end
+
+(* Removes a value from the SET and does nothing if it is not there *)
+fun remove (x,S) = 
+    case find (x,S) of 
+      Found i => update (S,i,NONE)
+    | _ => ()   
+
+(* Reduces a set s by removing a set s' of elements *)
+
+fun reduce (s,s') =
+   let fun rem NONE = ()
+       | rem (SOME x) = remove (x,s)
+   in
+    app rem s'
+   end
+
+(* emptySet takes a hint to the size as parameter *)
+
+fun emptySet n = array (n,NONE);
+
+(* Returns the union of the set and all the elements of the list *)
+(* Also has a helper function fromList *)
+
+fun addList (S,l) = List.app (fn x => insert (x,S)) l 
+
+(* member(x,s) tests if x is a member of set s *)
+
+fun member (x,s) =
+   case find (x,s) of
+   Found _ => true
+ | _ => false
+
+(* Tests if (s,s') is s is a subset of s' *)
+
+fun subset (S,S') =
+    let val n = length S
+     fun iter i = 
+         if i=n then true
+         else case sub(S,i) of 
+               NONE => iter (i+1)
+             | (SOME x) => member (x,S')  andalso iter (i+1)
+   in
+    iter 0
+   end
+
+(* Returns true if to sets are equal and false if they are not *)
+
+fun equal (s,t) = subset (s,t) andalso subset (t,s)
+
+(* Returns the difference of two sets *)
+fun restrict (S,S') =
+    let fun upt (i, NONE) = ()
+        | upt (i, SOME x) = 
+          if member (x,S') then ()
+          else update (S,i,NONE)
+    in
+     appi upt (S,0,NONE)
+    end 
+
+(* Hilbert epsilon operator.  Returns NONE only for empty set *)
+(* Satisfies member(valOf(epsilon s), s) for nonempty s *)
+
+fun epsilon S =
+   let val n = length S
+     fun look i =
+        if i=n then NONE 
+        else case sub(S,i) of 
+               NONE => look (i+1) 
+             | e => e
+    in
+     look 0
+    end
+
+(* isEmpty operator = not o isSome o epsilon *)
+
+fun isEmpty S =
+if (isSome(epsilon S)) then false
+else true
+
+fun dup S =
+    let val S' = array(length S, NONE)
+    in
+        copy {src=S, si=0, dst=S', di=0, len=NONE}; S'
+    end
+
+fun copy(A,B) =
+    let val a = length A
+        val b = length B
+        (* mkcopy makes the actual copy *)
+        fun mkcopy n = Array.copy {src=A, si=0, dst=B, di=0, len=SOME n}
+    in
+        if b >= a then (* Destination array is larger *)
+            (Array.modifyi (fn (_,x) => NONE) (B,a,NONE);(* Empty rest of it *)
+             mkcopy a) (* Make copy of A, including holes *)
+        else if size A >= b then raise SetIsFull(b-1) (* Too many elts in A *)
+        (* Move elements to the left of A, copy them (and enough holes
+         * to empty B); A is actually modified into an equivalent set *)
+        else (flushLeft A; mkcopy b)
+    end
+
+val study = flushLeft
+end
+
+structure SomeNFTestA = NFTest(structure IntSet = ArraySet(IntElem) and StrSet = ArraySet(StrElem)) 
+
+functor ListTable (E : EQ) : TABLE = struct
+
+type key = E.t 
+
+type 'a table = (key * 'a) list ref
+
+val eq = E.eq 
+
+(* create a new table *)
+
+fun create _ = ref []
+
+(* make the list fast somehow "this won't do it though" *)
+
+fun study _ = ()
+
+(* insert a key and value into the table *)
+
+fun insert (T as ref l) (k,x) =
+    let fun ins [] = [(k,x)]
+          | ins ((h as (c,y)) :: t) =
+            if eq(c,k) then (k,x) :: t
+            else h :: ins t
+    in
+        T := ins l
+    end
+
+(* remove a key and value from the table *)
+
+fun remove (T as ref l) k =
+   let fun rem [] = []
+       | rem ((h as (c,y)) :: t)  =
+       if (eq(c,k)) then t
+       else (h::rem t)
+in
+   T := rem l
+end
+
+(* clear the table  get it clear the table *)
+
+fun clear (T as ref l) =
+   let fun clean [] = []
+       | clean (x::t) = clean t
+   in
+     T := clean l
+   end;
+
+(* how many keys are there ? *)
+
+fun nbKeys (T as ref l) =
+   let fun nb [] n = n
+       | nb (x::t) n = nb t (n+1)
+   in
+     nb l 0
+   end
+
+(* give a list of the keys and values in any oreder *)
+
+fun keyValues (T as ref l) =
+    let fun keyValuesh [] p = p
+        | keyValuesh ((h as (c,y)) :: t) p = keyValuesh t (h::p)
+  in
+   keyValuesh l []
+  end
+
+(* APP *)
+fun app f (ref l) = List.app f l
+
+(* Find the value associated with a key *)
+
+fun find (T as ref l) k =
+   let fun f [] k = NONE
+       | f ((h as (c,y)) :: t) k =
+       if (eq(c,k)) then SOME y
+       else f t k
+   in f l k
+   end
+
+(* Return the values of the keys in a list format *)
+
+fun keys (T as ref l) =
+   let fun f [] p = p
+       | f ((h as (c,y)) :: t) p = f t (c::p)
+   in
+     f l []
+   end
+
+(* filter a table using a function *)
+
+fun filter f (T as ref l) =
+    let fun g [] = []
+        | g ((h as (c,y)) :: t) =
+        if f(c,y) then (h :: g t)
+        else g t
+    in
+     T := g l
+    end
+
+(* Copy a table from another table *)
+
+fun copy (T, (Q as ref p)) =
+   let fun cop [] F = ()
+       | cop ((h as (c,y)) :: t) F = (insert F h;cop t F)
+   in
+    cop p T
+   end
+
+(* Extend a table from another table *)
+
+fun extend T (Q as ref p) =
+   let fun ext [] F = ()
+       | ext ((h as (c,y)) :: t) F = (insert F h;ext t F)
+    in
+     ext p T
+    end
+
+(* Fast duplication of a table (simple return the refrence to the table) *)
+
+fun dup (T as ref l: 'a table) = T
+
+(* test if the table is clear! or not *)
+
+fun isEmpty (T as ref l) =
+   let fun emp [] = true
+       | emp _ = false
+   in
+    emp l
+   end
+
+(* Replaces each element by result of function; keys can be used *)
+
+fun modify f (T as ref l) = T := List.map (fn (k,x) => (k, f(k,x))) l
+
+(* folds elements *)
+
+fun fold f e (ref l) = List.foldl (fn ((k,x),y) => f(k,x,y)) e l
+
+(* fromList takes a int for size of table and then the list of pieces to make a table *)
+
+fun fromList ((n : int),(l : (key * 'a) list)) = ref l
+
+end

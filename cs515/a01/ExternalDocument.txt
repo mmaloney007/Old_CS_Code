@@ -1,0 +1,121 @@
+Victor Maloney CS 515 Assignment 1
+
+			Purpose of the Assignment:
+
+The task of this program is to simulate a bank teller system with either two
+lines and two bank tellers working or one line and one bank teller working.
+The problem is that most of the time the size of the orders vary dramatically.
+For instance you can just have a simple cash deposit but another person
+could have a cash deposit, change counting, and a check to cash.  So we simply
+make the average size of the order to process equal to eight.  Also for 
+every clock cycle there is only a 20% chance to that an order will come
+in and need help.
+
+This program is to prove which one works better.  In the case of two queues
+each processor is dedicated to one line.  In the case of one queue (one line)
+each processor (bank teller) will work on that single line.
+
+Using the simulation we want to find out the following:
+Over a run of a 1,000,000 cycles what is the longest wait you get?
+What is the percentage of items for which the wait is longer than 25 cycles?
+What is the percentage of items for which the wait is longer than 50 cycles?
+What is the percentage of items for which the wait is longer than 75 cycles?
+What is the percentage of items for which the wait is longer than 100 cycles?
+
+			Description of Software:
+
+The assignment was done with two classes and a main program.  One class was 
+a circular queue which hold items that are waiting to be processed.  It is a
+FIFO structure that gives back the first thing put into it.  The processor class
+is basically a decrementing class.  It has simple functions to tell you if it
+is free or not and the main goal of that is to simulate someone doing work.
+The main program has two big for loops that simulate the chance of getting an
+order and the size of it with a random number generator. In the for loop that 
+has two lines it also simulates which line a person will choose with the random
+number generator.
+
+I made this program to test the queue:
+
+
+// Victor M. Maloney CS 515 Assignment 1
+
+//This program tests the Queue.
+
+#include <stdlib.h>
+#include <iostream.h>
+#include "Node.h"
+#include "Queue.h"
+#include "Processor.h"
+
+int main()
+{
+	int time;
+	Node tmp2, tmp3;
+	Node tmp, tmp4;
+	Queue line1;
+	
+	tmp.size = 1;
+	tmp.starttime = 4;
+	tmp2.size = 2;
+	tmp2.starttime = 5;
+	tmp3.size = 3;
+	tmp3.starttime = 6;
+	tmp4.size = 7;
+	tmp4.starttime = 8;
+
+	line1.enqueue(tmp);
+	line1.enqueue(tmp2);
+	line1.enqueue(tmp3);
+	line1.enqueue(tmp4);
+
+	line1.print();
+
+	cout << "Dequeue one item\n";
+	line1.dequeue();
+
+	line1.print();
+	
+	line1.dequeue();
+	line1.dequeue();
+	line1.dequeue();
+
+	line1.print();
+
+	return 0;
+}
+
+This is the output of that test file that confirms the queue works:
+
+1 4
+2 5
+3 6
+7 8
+Dequeue one item
+2 5
+3 6
+7 8
+Empty Queue
+
+This is the output from the simulator program that confirms the correct
+assumption that one line goes faster than two:
+
+
+Two Queues & Two Processors 
+
+Total Processes = 199736
+Longest wait for a Process= 220
+Average Procces time = 7.99599
+Percentage of Processes that wait longer than 25 : 25.725 %
+Percentage of Processes that wait longer than 50 : 8.21785 %
+Percentage of Processes that wait longer than 75 : 2.45424 %
+Percentage of Processes that wait longer than 100 : 0.61381 %
+
+Single Queue & Two Processors 
+
+Total Processes = 200173
+Longest wait for a Process = 101
+Average Process time = 7.99483
+Percentage of Processes that wait longer than 25 : 6.42045 %
+Percentage of Processes that wait longer than 50 : 0.666424 %
+Percentage of Processes that wait longer than 75 : 0.084427 %
+Percentage of Processes that wait longer than 100 :  0.0014987 %

@@ -1,0 +1,13 @@
+This is a more-difficult file, in that
+it has "special characters" in the file.
+It also HAS ---some--- non-words which
+contain digits, such as x123 abc1de2xx 
+123bd, z1, and 214532yy111 - If a sequence of letters and digits
+exist (without special symbols separating the
+digits from the letters), then the sequence
+does not form a word.  Multiple hyphens,
+how-ev-er, are OK, as long as there are letters
+between them.  Hyphens also ** can ** break the
+sequence between alphas and digits, as in
+the word ant-number-23 and 123-go!  In fact,
+any special symbol will break 1*one+3 sequence.

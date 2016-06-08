@@ -1,0 +1,94 @@
+{\rtf1\mac\ansicpg10000\cocoartf100
+{\fonttbl\f0\froman\fcharset77 TimesNewRomanPS-BoldMT;\f1\froman\fcharset77 TimesNewRomanPSMT;\f2\froman\fcharset77 TimesNewRomanPS-ItalicMT;
+\f3\fmodern\fcharset77 CourierNewPSMT;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9000\viewh9000\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+
+\f0\b\fs48 \cf0 CS 610 
+\f1\b0\fs32 \
+\
+
+\f0\b\fs36 Homework 5
+\f1\b0\fs32 \
+ \
+\
+
+\f0\b\fs48 Due Date: 11/29/01
+\f1\b0\fs32 \
+ The homework is due in class on the 29th. No late homeworks will be accepted since the solution to this HW will be put up on the 29th to allow you to start working on the semaphore programming assignment (HW6) based on either question 3 or question 4 from this HW. \
+\
+
+\f0\b Note:
+\f1\b0  You are required to show all work to receive full credit. \
+\
+
+\f0\b\fs48 1. (5 points)
+\f1\b0\fs32 \
+\
+
+\f2\i Q-7.1 from the Text:
+\f1\i0  What is the meaning of the term busy waiting? What other kinds of waiting are there in an operating system? Can busy waiting be avoided altogether? Explain your answer. \
+\
+
+\f0\b\fs48 2. (15 points)
+\f1\b0\fs32 \
+\
+Consider the following computation: \
+\
+
+\f3\fs26 \
+r1 = 2 * a;\
+r2 = r1 * b;\
+r3 = 1 - r2;\
+r4 = c - d;\
+r5 = e + f;\
+r6 = r4 * r5;\
+r7 = r3 / r6;\
+answer = r7;\
+
+\f1\fs32 \
+\
+In the above computation, the lower-case letters refer to memory variables. Assume that each of the above steps takes 1 time unit to complete. Hence, the entire computation will take 8 time units on a single CPU. Suppose you were running this code on a 2 processor machine and you decide to split the above code into 2 threads that can be run in parallel on the 2 processors. For example, r1 = 2 * a; and r4 = c - d; can be executed in parallel since these 2 commands do not affect each other. The goal is to execute the above code in the least possible time on 2 processors. The threads on the 2 CPUs need to be synchronized. For example, if Thread1 contains the code r4 = c-d; and Thread2 contains the code r6 = r4*r5, you must ensure that r6=r4*r5 executes after r4=c-d; \
+\
+Use semaphores to synchronize the execution of the code on 2 processors. Assume that the P() and V() operations take 0 time units to complete (i.e., they are very fast operations compared to the computation time). What is the least number of time units required to run the computation on 2 CPUs? What is the minimum number of semaphore variables required to run the above code on 2 CPUs? \
+\
+
+\f0\b\fs48 3. (15 points)
+\f1\b0\fs32 \
+\
+
+\f2\i Q-7.8 from the Text: The Sleeping Barber Problem 
+\f1\i0 A Barbershop consists of a waiting room with n chairs, and the barber room containing the barber chair. If there are no customers to be served, the barber goes to sleep. If a customer enters the barbershop and all chairs are taken, then the customers will leave the shop. If the barber is busy, but chairs are available, then the customer sits in one of the free chairs. If the barber is asleep, the customer wakes up the barber. Write a program using semaphores to coordinate the barber and the customers. \
+\
+Important : Be sure to make variable declarations in your implementation and to specify initial values. \
+\
+
+\f0\b\fs48 4. (15 points)
+\f1\b0\fs32 \
+\
+
+\f2\i Q-7.9 from the Text: The Cigarette-Smokers Problem
+\f1\i0 . Consider a system with three 
+\f2\i smoker
+\f1\i0  processes and one 
+\f2\i agent
+\f1\i0  process. Each smoker continuously rolls a cigarette and then smokes it. But to roll and smoke a cigarette, the smoker needs three ingredients: tobacco, paper, and matches. One of the smoker processes has paper, another has tobacco, and the third has matches. The agent has an infinite supply of all three materials. The agent places two of the ingredients on the table. The smoker who has the remaining ingredient then makes and smokes a cigarette, signaling the agent on completion. The agent then puts out another two of the three ingredients, and the cycle repeats. \
+\
+Write the pseudocode to simulate this system using semaphores. You should write four processes: the 
+\f2\i agent
+\f1\i0  process and the three 
+\f2\i smoker
+\f1\i0  processes. Note: the three smokers can be represented by a single process with a parameter value to indicate which ingredient the smoker holds, e.g., 
+\f2\i smoker(i)
+\f1\i0  where 
+\f2\i i
+\f1\i0  can be 
+\f2\i tobacco
+\f1\i0 , 
+\f2\i paper
+\f1\i0 , or 
+\f2\i matches
+\f1\i0 . \
+\
+Be sure to declare all semaphores and other shared variables used in your implementation and to specify initial values. }

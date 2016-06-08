@@ -1,0 +1,268 @@
+//Victor Maloney CS 611 Assignment 4
+/*
+ *  This file contains a stub for a simple dynamic linker for the Alpha
+ *  architecture. The linker is not yet implemented.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "DL.h"
+
+void dynamicLinker(PLTentry* e)
+{
+	FILE *f;
+	int a = 0;
+	int b = 0;
+	long entrees = 0;
+	long stat = 0;
+	long addr = 0;
+	long len=0;
+	long variable1 = 0;
+	long variable2 = 0;
+	char *leng;
+	long *leng2;
+	char c;
+	char *procedure;
+	char *fileName;
+	char *code;
+	char *add;
+	PLTentry *tablePLT;
+	PLTentry *filePLT;
+	PLTentry *newPLT;
+	PLTentry tmp;
+	char *caller;
+	
+	union {
+		void (*point)(void);
+		long addr;
+	} u;
+
+	caller = e -> procedureName;	
+
+	if(e ->status == PLT_INSYMBOL)
+	{
+		printf("error PLT_INSYMBOL\n");
+	}
+
+	if((f = fopen((e -> objectFileName), "r")) == NULL)
+	{
+		printf("error opening object file\n");
+	}
+
+//---------reading in the object file--------------
+
+	for(a = 0;a < 8;a++)
+	{
+		c = getc(f);
+		c = c << (a*8);
+		entrees = entrees | c;
+	}
+	
+	filePLT = malloc((sizeof(PLTentry) * entrees));
+
+	for(b = 0;b < entrees;b++)
+	{ 	
+		
+		procedure = malloc(256);
+		a = 0;
+		stat = 0;
+		addr = 0;
+		variable1 = 0;
+		variable2 = 0;
+		c = getc(f);
+		while(c != 0)
+		{
+			procedure[a++] = c;
+			c = getc(f);
+		}
+		procedure[a] = '\0';
+		printf("procedure name = %s\n", procedure);
+	
+		fileName = malloc(256);
+		a = 0;
+		c = getc(f);
+		while(c != 0)
+		{
+			fileName[a++] = c;
+			c = getc(f);
+		}
+		fileName[a] = '\0';
+		printf("objFile = %s\n", fileName);
+	
+		for(a = 0;a < 8;a++)
+		{
+			c = getc(f);
+			variable1 = c | variable1;
+			variable1 = variable1 & (0xff << (a*8)); 	
+			variable1 = variable1 << (a*8);
+			stat = stat | variable1;
+			variable1 = 0;
+		}
+		printf("stat = %ld\n", stat);
+	
+		for(a = 0;a < 8;a++)
+		{
+			c = getc(f);
+			variable2 = c | variable2;
+			variable2 = variable2 & (0xff << (a*8)); 	
+			variable2 = variable2 << (a*8);
+			addr = addr | variable2;
+			variable2 = 0;
+		}
+		printf("address = %ld\n\n", addr);
+
+		tmp.procedureName = procedure;
+		tmp.objectFileName = fileName;
+		u.addr = addr;
+		printf("u.addr = %p\n", u.addr);
+		printf("u.point = %p\n", u.point);
+		tmp.procedureAddress = u.point;
+		tmp.status = stat; 	
+		filePLT[b] = tmp;
+	}
+
+//---Gets the length of the object code in the file---------
+	
+	for(a = 0;a < 8;a++)
+	{
+		c = getc(f);
+		variable1 = c | variable1;
+		variable1 = variable1 & (0xff << (a*8)); 	
+		len = len | variable1;
+		variable1 = 0;
+	}
+	
+	printf("length = %d\n", len);
+	
+	code = malloc(len);
+	for(a = 0;a < len;a++)
+	{
+		code[a] = getc(f);
+	}
+	
+	printf("\ncode address = %p\n", code);	
+	fclose(f);
+
+//--Fixes the addresses in memory to either DLstub or the correct-----
+//-------address in memory--------------------------------------------
+
+	for(a = 0;a < entrees;a++)
+	{
+		if(filePLT[a].status == PLT_INSYMBOL)
+		{
+			u.addr = *(long *)(&filePLT[a].procedureAddress) + *(long *)&code;
+			printf("u.addr = %p\n", u.addr);
+			printf("procedureAddress = %p\n", filePLT[a].procedureAddress);
+			filePLT[a].procedureAddress = u.point;
+			printf("filePLT[a].procedureAddress = %p\n", filePLT[a].procedureAddress);
+		}
+		if(filePLT[a].status == PLT_OUTSYMBOL)
+		{
+			filePLT[a].procedureAddress = &DLstub;
+		}	
+	}
+
+//-----fixes the quadwords in memory before the code---------------
+
+	for(a = 0;a < entrees;a++)
+	{	
+		if(filePLT[a].status == PLT_INSYMBOL)
+		{
+			printf("procedure address = %p\n", filePLT[a].procedureAddress);
+			add = (char *)(filePLT[a].procedureAddress);
+			printf("add = %p\n", (add)); 
+			add = add - 8;
+			*((PLTentry ***)add) = &PLT;
+			printf("address after assignment = %p\n", *(long *)add);
+			printf("&PLT = %p\n", &PLT); 
+			leng = (char *)(filePLT[a].procedureAddress);
+			leng = leng - 16;
+			leng2 = (long *)leng;
+			*leng2 = PLTlength; 		
+
+			printf("PLTlength = %d\n", PLTlength);
+			printf("leng = %d\n", *leng2);
+			printf("& of leng = %p\n", leng2);
+		}
+	}
+	
+//-----Makes sure the PLT tables are both correct-----------------
+
+	for(a = 0;a < PLTlength;a++)
+	{
+		for(b = 0;b < entrees;b++)
+		{
+			if(strcmp((PLT[a].procedureName),(filePLT[b].procedureName)) == 0)
+			{
+				printf("PLT name = %s\n", PLT[a].procedureName);
+				printf("tmp name = %s\n", filePLT[b].procedureName);
+				if(PLT[a].status == PLT_INSYMBOL && filePLT[b].status == PLT_INSYMBOL)
+				{
+					printf("error\n");
+				}	
+				
+				else if(PLT[a].status == PLT_INSYMBOL && filePLT[b].status == PLT_OUTSYMBOL)
+				{
+					filePLT[b].procedureAddress = PLT[a].procedureAddress;
+					filePLT[b].status = PLT_INSYMBOL;
+					*(filePLT[b].objectFileName) = '\0';
+				}
+				
+				else if(PLT[a].status == PLT_OUTSYMBOL && filePLT[b].status == PLT_INSYMBOL)
+				{
+					PLT[a].procedureAddress = filePLT[b].procedureAddress; 
+					PLT[a].status = PLT_INSYMBOL;
+					*(PLT[a].objectFileName) = '\0';
+				}
+				printf("procedureAddress (TMP) = %p\n", filePLT[b].procedureAddress);
+				printf("procedureAddress (PLT) = %p\n", PLT[a].procedureAddress);
+			}
+		}
+	}
+	
+//------Puts both PLT tables into newPLT table------------------------
+
+	newPLT = malloc(sizeof(PLTentry) * (PLTlength + entrees));
+	
+	for(a = 0;a < PLTlength;a++)
+	{
+		newPLT[a] = PLT[a];
+	}
+			
+	for(a = 0;a < entrees;a++)
+	{
+		newPLT[a + PLTlength] = filePLT[a];
+	}
+
+	if(PLTstatus == PLT_DYNAMIC_TABLE)
+	{
+		free(PLT);
+		PLT = newPLT;
+	}
+	else
+	{
+		PLT = newPLT;
+//		PLTstatus = PLT_DYNAMIC_TABLE;
+	}
+
+	PLTlength = PLTlength + entrees;
+			
+	printf("DLstub Address = %p\n", &DLstub);
+	for(a = 0;a < PLTlength;a++)
+	{
+		printf("PLT name = %s\n", PLT[a].procedureName);
+		printf("PLT objFileName = %s\n", PLT[a].objectFileName);
+		printf("PLT procedureAddress = %p\n", PLT[a].procedureAddress);
+		printf("PLT status = %d\n\n", PLT[a].status);
+	}
+
+	a = 0;
+	while(strcmp((PLT[a].procedureName), caller) != 0)
+	{
+		printf("PLT name = %s\n", PLT[a].procedureName);
+		a++;
+	}
+	printf("PLT[a].procedureAddress = %p\n", PLT[a].procedureAddress);
+	(*(PLT[a].procedureAddress))();
+}
+

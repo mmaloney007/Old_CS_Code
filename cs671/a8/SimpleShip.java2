@@ -1,0 +1,133 @@
+//Part one
+public class SimpleShip {
+
+    private double xpos;  //x position on a graph
+    private double ypos;  //y position on a graph
+    private double xspeed;  //degrees of the course
+    private double yspeed;  //speed of the ship
+
+   //Move the ship for an ammount of time
+   public void move(double time)
+   {
+    double d = Math.atan(yspeed/xspeed);
+    xpos += time * (xspeed - Math.sin(d));
+    ypos += time * (yspeed - Math.cos(d));
+   }
+
+   //increase the ships speed
+   public void accelerate(double xspeed, double yspeed)
+   {
+    double d = Math.atan(yspeed/xspeed);
+    if (xspeed > 0)
+    {
+     this.xspeed += xspeed;
+    }
+    else
+    {
+     System.out.println("Illegal Value\n");
+    }
+    if (yspeed > 0)
+    { 
+     this.yspeed += yspeed;
+    }
+    else 
+    {
+      System.out.println("Illegal Value\n");
+    }
+   }
+
+   //slow the ship down 
+   public void decelerate(double xspeed, double yspeed)
+   {
+    if(xspeed < 0)
+    {
+     System.out.println("Illegal Value\n");
+    }
+    else
+    {
+     this.xspeed -= xspeed;
+    }
+    if(yspeed < 0)
+    {
+     System.out.println("Illegal Value\n");
+    }
+    else
+    {
+     this.yspeed -= yspeed;
+    }
+   }
+
+   //stop the ship keeping the same course
+   public void stop()
+   {
+    double d = Math.atan(yspeed/xspeed);
+    
+    xspeed = Math.cos(d);
+    yspeed = Math.sin(d);
+   }
+  
+   //set the ships course keeping the same speed
+   public void setCourse(int course)
+   {
+    double d = Math.atan(course);
+    double s = getSpeed();
+    xspeed = Math.cos(d) * s;
+    yspeed = Math.sin(d) * s;
+   }
+  
+   //get the position of the ship
+   public double[] getPos()
+   {
+    double[] a = new double[2];
+
+    a[0] = xpos;
+    a[1] = ypos;
+
+    return a;
+   }
+   
+   //get the course in degrees
+   public int getCourse()
+   {
+    double d = Math.toDegrees(Math.atan(yspeed/xspeed));
+    return (int)d;
+   }
+  
+   //get the speed of the ship in x then y
+   public double getSpeed()
+   {
+    return ((xspeed * xspeed) + (yspeed * yspeed) - 1);
+   }
+
+   //give the status of the ship
+   public void status()
+   {
+    System.out.println("X-position: " + xpos + " Y-position: " + ypos + " Speed: " + getCourse() + " Course: " + getSpeed() + "\n");
+   }
+ 
+   //give the distance from one ship to another ship
+   public double distance(SimpleShip a)
+   {
+     double c = (this.xpos - a.xpos);
+     double b = (this.ypos - a.ypos);
+     return Math.sqrt((c*c) + (b*b));
+   }
+
+   //make a simple ship
+   public SimpleShip()
+   {
+     xpos = 0;
+     ypos = 0;
+     xspeed = 0;
+     yspeed = 0;
+    }
+
+    //make a ship starting from x then y position
+    public SimpleShip(double xpos, double ypos)
+    {
+     this.xpos = xpos;
+     this.ypos = ypos;
+     xspeed = 0;
+     yspeed = 0;
+    }
+}

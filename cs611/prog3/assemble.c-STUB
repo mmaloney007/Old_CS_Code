@@ -1,0 +1,47 @@
+/*
+ * assemble.c - assembly of Alpha assembler instructions.
+ *
+ * THIS JUST CONTAINS STUBS FOR THE ROUTINES!
+ */
+
+#include <stddef.h>
+#include "defs.h"
+
+/*
+ *        initializeAssemble
+ *
+ *        Initialize the assembler data structures.
+ */
+void initializeAssemble(void)
+{
+}
+
+/*
+ *        assemble
+ *
+ *        Assemble one label and/or instruction.
+ */
+void assemble(char *label, INSTRUCTION instr)
+{
+}
+
+/*
+ *        returnPointerToObjectCode
+ *
+ *        Return pointer to object code.
+ */
+unsigned char * returnPointerToObjectCode(void)
+{
+    return NULL;
+}
+
+/*
+ *        returnLengthOfObjectCode
+ *
+ *        Return length of object code.
+ */
+int returnLengthOfObjectCode(void)
+{
+    return 0;
+}
+
